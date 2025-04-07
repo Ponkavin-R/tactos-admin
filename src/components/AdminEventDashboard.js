@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { FaCalendarAlt, FaMoneyBillWave, FaCheckCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
 import axios from "axios";
 

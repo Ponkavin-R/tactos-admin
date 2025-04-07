@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-const Ecommerce = () => {
+export const Ecommerce = () => {
   const [stats, setStats] = useState({
     startupCount: 0,
     cofounderCount: 0,

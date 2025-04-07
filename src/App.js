@@ -1,12 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { FiSettings } from 'react-icons/fi';
-import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 
-import { Navbar, Sidebar, ThemeSetting, Footer } from './components';
-import {
-  Calendar, ColorPicker, ColorMapping, Customers, Ecommerce, Editor,
-  Employees, Kanban, Orders, Area, Bar, Financial, Line, Pie, Pyramid, Stacked
-} from './pages';
+import { Navbar} from './components';
 
 import { useStateContext } from './contexts/ContextProvider';
 import './App.css';
@@ -17,9 +11,10 @@ import EventDashboard from './components/AdminEventDashboard';
 import CofounderTable from './components/CoFounderTable';
 import BusinessesTable from './components/BusinessesTable';
 import BusinessTableConsultation from './components/BusinessConsultationTable';
+import Ecommerce from './pages/Ecommerce';
 
 function App() { 
-  const { activeMenu, themeSetting, setThemeSetting, currentColor, currentMode } = useStateContext();
+  const { activeMenu, currentMode } = useStateContext();
 
 
   return (
@@ -43,7 +38,6 @@ function App() {
 
           {/* Sidebar */}
           <div className={`fixed dark:bg-secondary-dark-bg bg-white h-screen transition-all duration-300 ${activeMenu ? "w-72" : "w-20"}`}>
-            <Sidebar />
           </div>
 
           {/* Main Content Section */}
@@ -56,7 +50,6 @@ function App() {
 
             {/* Page Content Below Navbar */}
             <div className="mt-16 p-5">
-              {themeSetting && <ThemeSetting />}
               
               <Routes>
                 {/* Dashboard */}

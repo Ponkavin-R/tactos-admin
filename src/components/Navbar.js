@@ -6,18 +6,21 @@ import { AiOutlineTeam, AiOutlineBulb, AiOutlineSolution } from "react-icons/ai"
 import { FaRegCalendarAlt, FaRegUser } from "react-icons/fa";
 import { MdBusinessCenter, MdMenu, MdClose } from "react-icons/md";
 
-const Navbar = () => {
-  const [activeTab, setActiveTab] = useState("/");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const location = useLocation();
 
-  useEffect(() => {
-    setActiveTab(location.pathname);
-  }, [location]);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
-  };
+
+  const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
+
+    const [activeTab, setActiveTab] = useState("/");
+    const location = useLocation();
+  
+    useEffect(() => {
+      setActiveTab(location.pathname);
+    }, [location]);
+  
+    const toggleSidebar = () => {
+      setIsSidebarOpen((prev) => !prev);  // <- This now calls the prop function from App
+    };
 
   return (
     <motion.aside
@@ -36,6 +39,7 @@ const Navbar = () => {
         <NavItem to="/cofounder-reg" icon={<FaRegUser />} label="Cofounder Registration" activeTab={activeTab} setActiveTab={setActiveTab} isSidebarOpen={isSidebarOpen} />
         <NavItem to="/business-idea-hub" icon={<AiOutlineBulb />} label="Business Ideation Hub" activeTab={activeTab} setActiveTab={setActiveTab} isSidebarOpen={isSidebarOpen} />
         <NavItem to="/business-consultation" icon={<AiOutlineBulb />} label="Business Consultation" activeTab={activeTab} setActiveTab={setActiveTab} isSidebarOpen={isSidebarOpen} />
+        <NavItem to="/careers-apply" icon={<MdBusinessCenter />} label="Jobs Applied" activeTab={activeTab} setActiveTab={setActiveTab} isSidebarOpen={isSidebarOpen} />
       </nav>
     </motion.aside>
   );

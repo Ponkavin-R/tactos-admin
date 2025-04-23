@@ -31,7 +31,7 @@ const AdminCareers = () => {
   }, []);
 
   const fetchCareers = async () => {
-    const res = await axios.get("https://tactos-backend.onrender.com/api/careers");
+    const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/careers`);
     setCareers(res.data);
   };
 
@@ -57,9 +57,9 @@ const AdminCareers = () => {
     };
 
     if (editingId) {
-      await axios.put(`https://tactos-backend.onrender.com/api/careers/${editingId}`, payload);
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/careers/${editingId}`, payload);
     } else {
-      await axios.post("https://tactos-backend.onrender.com/api/careers", payload);
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/careers`, payload);
     }
 
     setFormData(initialForm);
@@ -79,7 +79,7 @@ const AdminCareers = () => {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`https://tactos-backend.onrender.com/api/careers/${id}`);
+    await axios.delete(`${process.env.REACT_APP_API_URL}/api/careers/${id}`);
     fetchCareers();
   };
 

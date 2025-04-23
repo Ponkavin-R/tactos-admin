@@ -28,7 +28,7 @@ const AdminEventDashboard = () => {
   }, []);
 
   const fetchEvents = async () => {
-    const res = await axios.get("https://tactos-backend.onrender.com/api/events");
+    const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/events`);
     setEvents(res.data);
   };
 
@@ -43,9 +43,9 @@ const AdminEventDashboard = () => {
     e.preventDefault();
     try {
       if (editIndex !== null) {
-        await axios.put(`https://tactos-backend.onrender.com/api/events/${editIndex}`, formData);
+        await axios.put(`${process.env.REACT_APP_API_URL}/api/events/${editIndex}`, formData);
       } else {
-        await axios.post("https://tactos-backend.onrender.com/api/events", formData);
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/events`, formData);
       }
       fetchEvents();
       setShowForm(false);
@@ -91,7 +91,7 @@ const AdminEventDashboard = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://tactos-backend.onrender.com/api/events/${id}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/events/${id}`);
       fetchEvents();
     } catch (err) {
       console.error("Delete failed:", err);
@@ -100,7 +100,7 @@ const AdminEventDashboard = () => {
 
   const handleStatusChange = async (id) => {
     try {
-      await axios.patch(`https://tactos-backend.onrender.com/api/events/${id}`, { status: "Completed" });
+      await axios.patch(`${process.env.REACT_APP_API_URL}/api/events/${id}`, { status: "Completed" });
       fetchEvents();
     } catch (err) {
       console.error("Status update failed:", err);
@@ -162,7 +162,6 @@ const AdminEventDashboard = () => {
                   {event.status}
                 </span>
               </div>
-              <p className="text-gray-600 mt-2">{event.description}</p>
               <p className="text-sm text-gray-500 mt-1">Type: {event.type}</p>
               <p className="text-sm text-gray-500">Mode: {event.mode}</p>
               <p className="text-sm text-gray-500">
@@ -198,6 +197,7 @@ const AdminEventDashboard = () => {
                   </a>
                 </>
               )}
+              <p className="text-gray-600 mt-2">{event.description}</p>
               <div className="mt-3 flex space-x-2">
                 <button
                   onClick={() => handleEdit(event)}

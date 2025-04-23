@@ -4,7 +4,9 @@ import * as XLSX from "xlsx";
 import {
   Table, TableHead, TableRow, TableCell, TableBody,
   TableContainer, Paper, Button, Dialog,
-  DialogTitle, DialogContent, DialogActions
+  DialogTitle, DialogContent, DialogActions,
+  Typography, Box, TextField, Select, MenuItem,
+  InputLabel, FormControl, Stack
 } from "@mui/material";
 import { Delete, Download } from "@mui/icons-material";
 
@@ -23,7 +25,7 @@ const BusinessTableConsultation = () => {
 
   const fetchBusinesses = async () => {
     try {
-      const response = await axios.get("https://tactos-backend.onrender.com/api/businessesconsulation");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/businessesconsulation`);
       setBusinesses(response.data);
     } catch (error) {
       console.error("Error fetching businesses:", error);
@@ -32,7 +34,7 @@ const BusinessTableConsultation = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      await axios.delete(`https://tactos-backend.onrender.com/api/businessesconsultation/${selectedItem}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/businessesconsultation/${selectedItem}`);
       setDeleteDialogOpen(false);
       fetchBusinesses();
     } catch (error) {
@@ -70,116 +72,141 @@ const BusinessTableConsultation = () => {
   );
 
   return (
-    <Paper sx={{ p: 3, mt: 2, boxShadow: 3, borderRadius: 2 }}>
-      {/* Filter and Search */}
-      <div className="flex flex-col sm:flex-row mb-4 gap-2 items-center">
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="border p-2 rounded w-full sm:w-auto"
+    <Box sx={{ p: 4 }}>
+      <Typography variant="h4" fontWeight="bold" textAlign="start" gutterBottom color="primary">
+        Business Consultation
+      </Typography>
+
+      <Paper elevation={4} sx={{ p: 3, mt: 2, borderRadius: 3 }}>
+        {/* Filters & Search */}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          justifyContent="space-between"
+          alignItems="center"
+          mb={3}
         >
-          <option value="">All</option>
-          <option value="fullName">Full Name</option>
-          <option value="email">Email</option>
-          <option value="phone">Phone</option>
-          <option value="location">Location</option>
-          <option value="businessName">Business Name</option>
-          <option value="industry">Industry</option>
-          <option value="businessStage">Business Stage</option>
-          <option value="website">Website</option>
-        </select>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Filter by</InputLabel>
+            <Select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              label="Filter by"
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="fullName">Full Name</MenuItem>
+              <MenuItem value="email">Email</MenuItem>
+              <MenuItem value="phone">Phone</MenuItem>
+              <MenuItem value="location">Location</MenuItem>
+              <MenuItem value="businessName">Business Name</MenuItem>
+              <MenuItem value="industry">Industry</MenuItem>
+              <MenuItem value="businessStage">Business Stage</MenuItem>
+              <MenuItem value="website">Website</MenuItem>
+            </Select>
+          </FormControl>
 
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search"
-          className="border p-2 rounded w-full"
-        />
+          <TextField
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            label="Search"
+            fullWidth
+          />
 
-        <Button variant="contained" color="success" onClick={handleDownloadExcel} startIcon={<Download />}>
-          Download Excel
-        </Button>
-      </div>
-
-      {/* Table */}
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Full Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Location</TableCell>
-              <TableCell>Business Name</TableCell>
-              <TableCell>Industry</TableCell>
-              <TableCell>Stage</TableCell>
-              <TableCell>Website</TableCell>
-              <TableCell>Needs</TableCell>
-              <TableCell>Mentorship</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {displayedBusinesses.map((item) => (
-              <TableRow key={item._id} hover>
-                <TableCell>{item.fullName || "—"}</TableCell>
-                <TableCell>{item.email || "—"}</TableCell>
-                <TableCell>{item.phone || "—"}</TableCell>
-                <TableCell>{item.location || "—"}</TableCell>
-                <TableCell>{item.businessName || "—"}</TableCell>
-                <TableCell>{item.industry || "—"}</TableCell>
-                <TableCell>{item.businessStage || "—"}</TableCell>
-                <TableCell>{item.website || "—"}</TableCell>
-                <TableCell>{item.consultationNeeds?.join(", ") || "—"}</TableCell>
-                <TableCell>{item.mentorship || "—"}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    startIcon={<Delete />}
-                    onClick={() => {
-                      setSelectedItem(item._id);
-                      setDeleteDialogOpen(true);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Pagination */}
-      <div className="flex justify-between items-center mt-4">
-        <Button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
-          Previous
-        </Button>
-        <span>
-          Page {currentPage} of {totalPages || 1}
-        </span>
-        <Button
-          disabled={currentPage === totalPages || totalPages === 0}
-          onClick={() => setCurrentPage(currentPage + 1)}
-        >
-          Next
-        </Button>
-      </div>
-
-      {/* Delete Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>Are you sure you want to delete this business consultation?</DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={handleDeleteConfirm}>
-            Yes, Delete
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleDownloadExcel}
+            startIcon={<Download />}
+          >
+            Download Excel
           </Button>
-        </DialogActions>
-      </Dialog>
-    </Paper>
+        </Stack>
+
+        {/* Table */}
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead sx={{ backgroundColor: "#f3f4f6" }}>
+              <TableRow>
+                <TableCell><strong>Full Name</strong></TableCell>
+                <TableCell><strong>Email</strong></TableCell>
+                <TableCell><strong>Phone</strong></TableCell>
+                <TableCell><strong>Location</strong></TableCell>
+                <TableCell><strong>Business Name</strong></TableCell>
+                <TableCell><strong>Industry</strong></TableCell>
+                <TableCell><strong>Stage</strong></TableCell>
+                <TableCell><strong>Website</strong></TableCell>
+                <TableCell><strong>Needs</strong></TableCell>
+                <TableCell><strong>Mentorship</strong></TableCell>
+                <TableCell><strong>Actions</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {displayedBusinesses.map((item) => (
+                <TableRow key={item._id} hover>
+                  <TableCell>{item.fullName || "—"}</TableCell>
+                  <TableCell>{item.email || "—"}</TableCell>
+                  <TableCell>{item.phone || "—"}</TableCell>
+                  <TableCell>{item.location || "—"}</TableCell>
+                  <TableCell>{item.businessName || "—"}</TableCell>
+                  <TableCell>{item.industry || "—"}</TableCell>
+                  <TableCell>{item.businessStage || "—"}</TableCell>
+                  <TableCell>{item.website || "—"}</TableCell>
+                  <TableCell>{item.consultationNeeds?.join(", ") || "—"}</TableCell>
+                  <TableCell>{item.mentorship || "—"}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      startIcon={<Delete />}
+                      onClick={() => {
+                        setSelectedItem(item._id);
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* Pagination */}
+        <Box className="flex justify-between items-center mt-4">
+          <Button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            Previous
+          </Button>
+          <Typography>
+            Page {currentPage} of {totalPages || 1}
+          </Typography>
+          <Button
+            disabled={currentPage === totalPages || totalPages === 0}
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            Next
+          </Button>
+        </Box>
+
+        {/* Delete Dialog */}
+        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+          <DialogTitle>Confirm Deletion</DialogTitle>
+          <DialogContent>
+            Are you sure you want to delete this business consultation?
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button color="error" variant="contained" onClick={handleDeleteConfirm}>
+              Yes, Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Paper>
+    </Box>
   );
 };
 

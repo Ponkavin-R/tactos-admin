@@ -14,6 +14,9 @@ import BusinessesTable from './components/BusinessesTable';
 import BusinessTableConsultation from './components/BusinessConsultationTable';
 import Ecommerce from './pages/Ecommerce';
 import RecruitmentsTable from './components/RecruitmentsTable';
+import AdminTestimonials from './components/AdminTestimonials';
+import AdminInvestors from './components/AdminInvestors';
+import FundingDashboard from './components/FundingDashboard';
 
 function App() {
   const { currentMode } = useStateContext();
@@ -52,6 +55,9 @@ function App() {
                 <Route path='/business-idea-hub' element={<BusinessesTable />} />
                 <Route path='/business-consultation' element={<BusinessTableConsultation />} />
                 <Route path='/careers-apply' element={<RecruitmentsTable />} />
+                <Route path='/admin-testimonial' element={<AdminTestimonials/>} />
+                <Route path='/admin-investors' element={<AdminInvestors/>} />
+                <Route path='/fundings' element={<FundingDashboard/>} />
               </Routes>
             </div>
           </div>

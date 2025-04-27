@@ -16,7 +16,7 @@ const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#0ea5e9', '#a855f7'
 
 const iconList = [
   <FaUsers />, <FaHandshake />, <FaBriefcase />, <FaChartLine />,
-  <MdBusinessCenter />, <FaRegCalendarAlt />, <AiOutlineSolution />,
+  <MdBusinessCenter />, <FaRegCalendarAlt />, <AiOutlineSolution />,<AiOutlineSolution />,
 ];
 
 const Ecommerce = () => {
@@ -28,6 +28,8 @@ const Ecommerce = () => {
     careerCount: 0,
     eventCount: 0,
     solutionCount: 0,
+    fundingCount: 0
+
   });
 
   useEffect(() => {

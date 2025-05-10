@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import {
+  FiTag,
+  FiMonitor,
+  FiCalendar,
+  FiMapPin,
+  FiLink,
+  FiDollarSign,
+} from "react-icons/fi";
 
 const AdminEventDashboard = () => {
   const [activeTab, setActiveTab] = useState("Free");
@@ -116,113 +124,148 @@ const AdminEventDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Admin Event Dashboard</h1>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md"
-            onClick={() => setShowForm(true)}
-          >
-            Add New Event
-          </button>
-        </div>
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-6 px-4 py-3 bg-white shadow rounded-xl border border-gray-200">
+  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+    <span>Tactos Events</span>
+  </h2>
 
-        <div className="flex space-x-4 mb-6">
-          {["Free", "Paid", "Completed"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => handleTabChange(tab)}
-              className={`px-4 py-2 rounded-full ${
-                activeTab === tab ? "bg-blue-600 text-white" : "bg-white text-gray-700 border"
-              }`}
+  <button
+    onClick={() => setShowForm(true)}
+    className="bg-blue-600 text-white px-5 py-2.5 rounded-full font-semibold shadow hover:bg-blue-700 transition"
+  >
+    Add New Event
+  </button>
+</div>
+
+<div className="flex flex-wrap gap-4 mb-6 px-2">
+  {["Free", "Paid", "Completed"].map((tab) => (
+    <button
+      key={tab}
+      onClick={() => handleTabChange(tab)}
+      className={`px-5 py-2.5 rounded-full text-sm font-semibold transition shadow ${
+        activeTab === tab
+          ? "bg-blue-600 text-white"
+          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+      }`}
+    >
+      {tab} Events
+    </button>
+  ))}
+</div>
+
+
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {filteredEvents.map((event) => (
+    <div
+      key={event._id}
+      className="bg-white shadow-lg rounded-2xl p-6 relative border border-gray-100 transition hover:shadow-xl"
+    >
+      {/* Status badge */}
+      <span
+        className={`absolute top-4 right-4 px-3 py-1 text-xs font-semibold rounded-full ${
+          event.status === "Completed"
+            ? "bg-green-100 text-green-800"
+            : "bg-yellow-100 text-yellow-800"
+        }`}
+      >
+        {event.status}
+      </span>
+
+      {/* Logo + Name */}
+      <div className="flex items-center gap-4 mb-3">
+        {event.logo && (
+          <img
+            src={event.logo}
+            alt="event"
+            className="w-12 h-12 object-contain rounded-full border"
+          />
+        )}
+        <h2 className="text-lg font-bold text-gray-800">{event.name}</h2>
+      </div>
+
+      {/* Info Section */}
+      <div className="space-y-1 text-sm text-gray-600 mb-2">
+        <p className="flex items-center gap-2">
+          <FiTag className="text-blue-500" /> Type: <span className="font-medium">{event.type}</span>
+        </p>
+        <p className="flex items-center gap-2">
+          <FiMonitor className="text-purple-500" /> Mode: <span className="font-medium">{event.mode}</span>
+        </p>
+        <p className="flex items-center gap-2">
+          <FiCalendar className="text-green-500" />
+          Date: {event.date} | Time: {event.time}
+        </p>
+
+        {event.mode === "Online" ? (
+          <p className="flex items-center gap-2 text-blue-600">
+            <FiLink />
+            <a
+              href={event.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline break-words"
             >
-              {tab} Events
-            </button>
-          ))}
-        </div>
+              Join Link
+            </a>
+          </p>
+        ) : (
+          <p className="flex items-center gap-2">
+            <FiMapPin className="text-red-500" /> Location: {event.location}
+          </p>
+        )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredEvents.map((event) => (
-            <div key={event._id} className="bg-white shadow p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                {event.logo && (
-                  <img
-                    src={event.logo}
-                    alt="event"
-                    className="w-12 h-12 object-contain rounded"
-                  />
-                )}
-                <h2 className="text-xl font-semibold text-gray-800">{event.name}</h2>
-                <span
-                  className={`text-sm px-2 py-1 rounded-full ${
-                    event.status === "Completed"
-                      ? "bg-green-200 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {event.status}
-                </span>
-              </div>
-              <p className="text-sm text-gray-500 mt-1">Type: {event.type}</p>
-              <p className="text-sm text-gray-500">Mode: {event.mode}</p>
-              <p className="text-sm text-gray-500">
-                Date: {event.date} | Time: {event.time}
-              </p>
-              {event.mode === "Online" ? (
-                <p className="text-sm text-blue-600">
-                  Join Link:{" "}
-                  <a
-                    href={event.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline"
-                  >
-                    {event.link}
-                  </a>
-                </p>
-              ) : (
-                <p className="text-sm text-gray-600">Location: {event.location}</p>
-              )}
-              {event.type === "Paid" && (
-                <>
-                  <p className="text-sm text-gray-700 font-semibold mt-1">
-                    Amount: ₹{event.amount}
-                  </p>
-                  <a
-                    href={event.paymentLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline text-sm"
-                  >
-                    Payment Link
-                  </a>
-                </>
-              )}
-              <p className="text-gray-600 mt-2">{event.description}</p>
-              <div className="mt-3 flex space-x-2">
-                <button
-                  onClick={() => handleEdit(event)}
-                  className="text-blue-500 hover:underline text-sm"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(event._id)}
-                  className="text-red-500 hover:underline text-sm"
-                >
-                  Delete
-                </button>
-                {event.status !== "Completed" && (
-                  <button
-                    onClick={() => handleStatusChange(event._id)}
-                    className="text-green-500 hover:underline text-sm"
-                  >
-                    Mark Completed
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+        {event.type === "Paid" && (
+          <>
+            <p className="flex items-center gap-2 font-medium text-gray-700">
+              <FiDollarSign className="text-yellow-500" /> Amount: ₹{event.amount}
+            </p>
+            <a
+              href={event.paymentLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline text-sm"
+            >
+              Payment Link
+            </a>
+          </>
+        )}
+      </div>
+
+      {/* Description (limited to 2 lines) */}
+      <p className="text-sm text-gray-700 mt-2">
+  {event.description.length > 30
+    ? `${event.description.slice(0, 30)}...`
+    : event.description}
+</p>
+
+
+      {/* Action buttons */}
+      <div className="flex justify-end gap-4 mt-4">
+        <button
+          onClick={() => handleEdit(event)}
+          className="text-blue-600 hover:underline text-sm font-medium"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => handleDelete(event._id)}
+          className="text-red-600 hover:underline text-sm font-medium"
+        >
+          Delete
+        </button>
+        {event.status !== "Completed" && (
+          <button
+            onClick={() => handleStatusChange(event._id)}
+            className="text-green-600 hover:underline text-sm font-medium"
+          >
+            Mark Completed
+          </button>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
+
 
         {/* Popup Form */}
         {showForm && (
@@ -350,7 +393,7 @@ const AdminEventDashboard = () => {
                     value={formData.description}
                     onChange={handleInputChange}
                     placeholder="Description"
-                    className="w-full border px-4 py-2 rounded-lg shadow-sm resize-none h-24"
+                    className="w-full border px-4 py-2 rounded-lg shadow-sm resize-none h-36"
                     required
                   />
                 </div>

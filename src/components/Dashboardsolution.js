@@ -40,7 +40,7 @@ const DashboardSolution = () => {
       }}
     >
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">IT Solution Form</h2>
+        <h2 className="text-2xl font-semibold text-gray-800">Tech Support Registration</h2>
         <span style={{
                       backgroundColor: "#e0f7fa",
                       color: "#00796b",

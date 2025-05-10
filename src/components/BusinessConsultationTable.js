@@ -73,9 +73,6 @@ const BusinessTableConsultation = () => {
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" fontWeight="bold" textAlign="start" gutterBottom color="primary">
-        Business Consultation
-      </Typography>
 
       <Paper elevation={4} sx={{ p: 3, mt: 2, borderRadius: 3 }}>
         {/* Filters & Search */}
@@ -84,8 +81,10 @@ const BusinessTableConsultation = () => {
           spacing={2}
           justifyContent="space-between"
           alignItems="center"
+          className="flex flex-col sm:flex-row mb-4 gap-2 items-center"
           mb={3}
         >
+           <h2 style={{ fontWeight: "bold", fontSize: "24px", marginBottom: "16px" }}>Business Consultation</h2>
           <FormControl sx={{ minWidth: 200 }}>
             <InputLabel>Filter by</InputLabel>
             <Select

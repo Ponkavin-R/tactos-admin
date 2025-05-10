@@ -11,6 +11,7 @@ import { AiOutlineSolution } from 'react-icons/ai';
 import axios from 'axios';
 import DashboardSolution from '../components/Dashboardsolution';
 import JobApplicants from '../components/JobApplicants';
+import FundingTable from '../components/FundingTable';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#0ea5e9', '#a855f7', '#f43f5e'];
 
@@ -85,7 +86,7 @@ const Ecommerce = () => {
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm max-h-[320px] overflow-y-auto">
-            <JobApplicants />
+            <FundingTable/>
           </div>
         </div>
 

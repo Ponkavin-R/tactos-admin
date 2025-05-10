@@ -17,6 +17,9 @@ import RecruitmentsTable from './components/RecruitmentsTable';
 import AdminTestimonials from './components/AdminTestimonials';
 import AdminInvestors from './components/AdminInvestors';
 import FundingDashboard from './components/FundingDashboard';
+import JobsDashboard from './components/JobsDashboard';
+import JobsByUser from './components/JobsByUser';
+import ApplicationDetail from './components/ApplicationDetail';
 
 function App() {
   const { currentMode } = useStateContext();
@@ -49,7 +52,7 @@ function App() {
                 <Route path='/' element={<Ecommerce />} />
                 <Route path='/solutions' element={<SolutionsTable />} />
                 <Route path='/startup-reg' element={<StartupTable />} />
-                <Route path='/career' element={<AdminCareers />} />
+                <Route path='/career' element={<JobsDashboard />} />
                 <Route path='/events' element={<EventDashboard />} />
                 <Route path='/cofounder-reg' element={<CofounderTable />} />
                 <Route path='/business-idea-hub' element={<BusinessesTable />} />
@@ -58,6 +61,9 @@ function App() {
                 <Route path='/admin-testimonial' element={<AdminTestimonials/>} />
                 <Route path='/admin-investors' element={<AdminInvestors/>} />
                 <Route path='/fundings' element={<FundingDashboard/>} />
+                <Route path="/admin/jobs/:userId" element={<JobsByUser/>} />
+                <Route path="/admin/application/:jobId" element={<ApplicationDetail />} />
+
               </Routes>
             </div>
           </div>

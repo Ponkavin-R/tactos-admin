@@ -42,7 +42,7 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
         <NavItem
           to="/solutions"
           icon={<AiOutlineSolution />}
-          label="Solutions"
+          label="Tech Support"
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           isSidebarOpen={isSidebarOpen}
@@ -58,7 +58,7 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
         <NavItem
           to="/career"
           icon={<MdBusinessCenter />}
-          label="Career"
+          label="Jobs"
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           isSidebarOpen={isSidebarOpen}
@@ -103,14 +103,14 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
           setActiveTab={setActiveTab}
           isSidebarOpen={isSidebarOpen}
         />
-        <NavItem
+        {/* <NavItem
           to="/careers-apply"
           icon={<MdBusinessCenter />}
           label="Jobs Applied"
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           isSidebarOpen={isSidebarOpen}
-        />
+        /> */}
         <NavItem
           to="/admin-testimonial"
           icon={<MdBusinessCenter />}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaTimes, FaWhatsapp, FaFacebookF, FaLink } from 'react-icons/fa';
-
+import { FaTimes, FaFacebook, FaWhatsapp, FaRegCopy } from 'react-icons/fa';
+import { motion, AnimatePresence } from "framer-motion";
 const FundingDashboard = () => {
   const [fundings, setFundings] = useState([]);
   const [filteredFundings, setFilteredFundings] = useState([]);
@@ -112,7 +112,11 @@ const FundingDashboard = () => {
         {filteredFundings.length > 0 ? (
           filteredFundings.map((funding) => (
             <div key={funding._id} className="bg-white p-4 rounded-lg shadow-md">
-              <img src={funding.logoUrl} alt={funding.sector} className="w-full h-48 object-cover mb-4 rounded" />
+              <motion.img
+          src={`${process.env.REACT_APP_API_URL}${funding.logoUrl}`}
+          alt="Startup Logo"
+          className="w-full h-40 object-cover"
+        />
               <h2 className="text-xl font-semibold mb-1">{funding.sector}</h2>
               <p className="text-gray-600 text-sm mb-1">{funding.shortDescription}</p>
               <p className="text-gray-500 text-sm">Location: {funding.location}</p>
@@ -146,49 +150,160 @@ const FundingDashboard = () => {
         )}
       </div>
 
-      {/* Popup */}
-      {showPopup && selectedFunding && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 overflow-auto">
-          <div className="bg-white rounded-lg shadow-lg w-full h-screen max-w-5xl relative flex flex-col md:flex-row p-6 gap-8">
-
-            {/* Close Button */}
-            <button onClick={handleClosePopup} className="absolute top-4 right-4 text-2xl text-gray-600 hover:text-gray-900">
-              <FaTimes />
-            </button>
-
-            {/* Left Side: Video and Long Description */}
-            <div className="md:w-2/3">
-              {selectedFunding.youtube ? (
-                <iframe
-                  src={getEmbedUrl(selectedFunding.youtube)}
-                  title="Startup Video"
-                  className="w-full h-2/3 rounded-md mb-4"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <div className="w-full h-80 flex items-center justify-center bg-gray-100 text-gray-400 mb-4">
-                  No Video Available
+      {/* Popup Modal */}
+       <AnimatePresence>
+        {selectedFunding && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center px-4 py-8"
+          >
+            <motion.div
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              className="bg-white w-full max-w-7xl rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] p-8 relative grid grid-cols-1 md:grid-cols-2 gap-8"
+            >
+              <button
+                onClick={() => setSelectedFunding(null)}
+                className="absolute top-5 right-6 text-gray-600 hover:text-black text-2xl"
+              >
+                <FaTimes />
+              </button>
+      
+              {/* Left Section: Video + Long Description */}
+              <div className="space-y-6">
+                <div className="w-full h-64 md:h-[28rem] rounded-lg overflow-hidden">
+                  <iframe
+                    src={selectedFunding.youtube}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="Startup Video"
+                  />
                 </div>
-              )}
-              <p className="text-gray-700 text-base">{selectedFunding.longDescription}</p>
-            </div>
-
-            {/* Right Side: Logo and Info */}
-            <div className="md:w-1/3 flex flex-col items-center text-center gap-4">
-              <img src={selectedFunding.logoUrl} alt="Logo" className="w-36 h-36 object-cover rounded-full shadow-md" />
-              <h2 className="text-2xl font-bold">{selectedFunding.sector}</h2>
-              <p className="text-blue-600">{selectedFunding.location}</p>
-              <p className="text-gray-600">{selectedFunding.shortDescription}</p>
-
-              {/* Social Share */}
-             
-            </div>
-
+      
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">About the Startup</h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    {selectedFunding.longDescription}
+                  </p>
+                </div>
+              </div>
+      
+              {/* Right Section: Company Info + Stats + Actions */}
+              <div className="space-y-6">
+                {/* Company Info */}
+                <div className="flex flex-col items-center text-center space-y-2">
+                  <img
+                    src={`${process.env.REACT_APP_API_URL}${selectedFunding.logoUrl}`}
+                    alt="Logo"
+                    className="w-24 h-24 object-cover rounded-full border shadow"
+                  />
+                  <h2 className="text-2xl font-bold text-gray-800">{selectedFunding.companyName}</h2>
+                  <p className="text-sm text-blue-600 font-medium">{selectedFunding.sector}</p>
+                  <p className="text-sm text-gray-600">{selectedFunding.location}</p>
+                  <p className="text-sm text-gray-700 italic">{selectedFunding.shortDescription}</p>
+                </div>
+      
+                <hr className="border-t" />
+      
+                <h4 className="text-2xl font-bold text-blue-950 mb-6 flex items-center gap-2">
+         <span>Funding Details</span>
+      </h4>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-white p-6 rounded-2xl shadow-lg border border-gray-100 text-gray-700 text-sm">
+        <div>
+          <p className="font-semibold text-gray-600">Amount Seeking</p>
+          <p className="text-lg font-medium text-green-700">
+            ₹{selectedFunding?.amountSeeking?.toLocaleString?.() || 'N/A'}
+          </p>
+        </div>
+      
+        <div>
+          <p className="font-semibold text-gray-600">Equity Offered</p>
+          <p className="text-lg font-medium">{selectedFunding?.equityOffered ?? 'N/A'}%</p>
+        </div>
+      
+        <div>
+          <p className="font-semibold text-gray-600">Valuation</p>
+          <p className="text-lg font-medium text-indigo-700">
+            ₹{selectedFunding?.valuation?.toLocaleString?.() || 'N/A'}
+          </p>
+        </div>
+      
+        <div>
+          <p className="font-semibold text-gray-600">Fund Usage</p>
+          <p className="text-base">{selectedFunding?.fundUsage ?? 'N/A'}</p>
+        </div>
+      
+        <div>
+          <p className="font-semibold text-gray-600">Min Investment</p>
+          <p className="text-lg font-medium">
+            ₹{selectedFunding?.minimumInvestment?.toLocaleString?.() || 'N/A'}
+          </p>
+        </div>
+      
+        <div>
+          <p className="font-semibold text-gray-600">Ticket Size</p>
+          <p className="text-lg font-medium">
+            ₹{selectedFunding?.ticketSize?.toLocaleString?.() || 'N/A'}
+          </p>
+        </div>
+      
+        <div className="col-span-1 sm:col-span-2">
+          <p className="font-semibold text-gray-600">Role for Investors</p>
+          <p className="text-base">{selectedFunding?.roleProvided ?? 'N/A'}</p>
+        </div>
+      
+        {/* Amount Raised & Progress Bar */}
+        <div className="col-span-1 sm:col-span-2 mt-4">
+          <p className="font-semibold text-gray-600 mb-1">
+            Amount Raised:
+            <span className="ml-2 font-bold text-green-700">
+              ₹{selectedFunding?.amountRaised?.toLocaleString?.() || '0'}
+            </span>
+          </p>
+      
+          <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{
+                width: `${
+                  Math.min(
+                    ((selectedFunding?.amountRaised || 0) / (selectedFunding?.amountSeeking || 1)) * 100,
+                    100
+                  )
+                }%`,
+              }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+              className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full"
+            />
+          </div>
+      
+          <div className="text-right text-sm text-gray-500 mt-1">
+            {Math.min(
+              (((selectedFunding?.amountRaised || 0) / (selectedFunding?.amountSeeking || 1)) * 100).toFixed(2),
+              100
+            )}% funded
           </div>
         </div>
-      )}
+      </div>
+      
+      
+      
+      
+                <hr className="border-t" />
+      
+               
+              </div>
+            </motion.div>
+      
+      
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

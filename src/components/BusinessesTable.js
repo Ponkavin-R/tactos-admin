@@ -71,16 +71,13 @@ const BusinessesTable = () => {
 
   return (
     <div className="p-4">
-      <Typography
-        variant="h4"
-        className="text-center font-bold text-3xl mb-6 text-blue-800"
-      >
-        Business Ideation Hub
-      </Typography>
 
       <Paper sx={{ p: 3, boxShadow: 5, borderRadius: 4 }}>
         {/* Filter and Search */}
-        <div className="flex flex-col sm:flex-row mb-4 gap-4 items-center">
+
+ <div className="flex flex-col sm:flex-row mb-4 gap-2 items-center">
+          <h2 style={{ fontWeight: "bold", fontSize: "24px", marginBottom: "16px" }}>Business Ideation Hub</h2>
+          
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
@@ -102,20 +99,14 @@ const BusinessesTable = () => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search..."
-            className="border border-gray-300 p-2 rounded-md w-full sm:w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Search"
+            className="border p-2 rounded w-full"
           />
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleDownloadExcel}
-            startIcon={<Download />}
-          >
+          <Button variant="contained" color="success" onClick={handleDownloadExcel} startIcon={<Download />}>
             Download Excel
           </Button>
         </div>
-
         {/* Table */}
         <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
           <Table>

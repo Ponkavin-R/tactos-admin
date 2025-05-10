@@ -83,18 +83,28 @@ const SolutionsTable = () => {
 
   return (
     <Paper className="p-4 mt-6 rounded-2xl shadow-md bg-white">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">📊 IT Solutions Data</h2>
-        <Button
-          variant="contained"
-          color="success"
-          startIcon={<Download />}
-          onClick={handleDownloadExcel}
-          className="rounded-full"
-        >
-          Download Excel
-        </Button>
-      </div>
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-6 px-4 py-3 bg-white shadow rounded-xl border border-gray-200">
+  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+     <span>Tech Support</span>
+  </h2>
+
+  <Button
+    variant="contained"
+    color="success"
+    startIcon={<Download />}
+    onClick={handleDownloadExcel}
+    sx={{
+      borderRadius: '9999px', // fully rounded
+      textTransform: 'none',
+      fontWeight: 'bold',
+      paddingX: 2.5,
+      paddingY: 1,
+    }}
+  >
+    Download Excel
+  </Button>
+</div>
+
 
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <select

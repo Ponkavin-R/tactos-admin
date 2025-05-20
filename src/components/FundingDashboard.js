@@ -3,11 +3,59 @@ import axios from 'axios';
 import { FaTimes, FaFacebook, FaWhatsapp, FaRegCopy } from 'react-icons/fa';
 import { motion, AnimatePresence } from "framer-motion";
 const FundingDashboard = () => {
-  const [fundings, setFundings] = useState([]);
+  const [fundings, setFundings] = useState([]); // your list of funding objects
+
   const [filteredFundings, setFilteredFundings] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [selectedFunding, setSelectedFunding] = useState(null);
+  const [editingStatusId, setEditingStatusId] = useState(null);
+  const [isEditingAmount, setIsEditingAmount] = useState(false);
+const [newAmountRaised, setNewAmountRaised] = useState(selectedFunding?.amountRaised || 0);
+
+  const [showCancelPopup, setShowCancelPopup] = useState(null); // holds the funding ID to cancel
+
+const [newStatus, setNewStatus] = useState("");
+
+const STATUS_COLORS = {
+  waiting: "bg-blue-200 text-blue-800",
+  "on hold": "bg-yellow-200 text-yellow-800",
+  approved: "bg-green-200 text-green-800",
+  Pending: "bg-gray-200 text-gray-700",
+};
+
+
+const handleStatusChange = async (id, status) => {
+  try {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/api/fundings/update-status/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // Update local state to reflect status change
+      const updatedFundings = fundings.map(f =>
+        f._id === id ? { ...f, status } : f
+      );
+      setFundings(updatedFundings);
+      applySearchFilter(searchTerm, updatedFundings);
+      setEditingStatusId(null); // close dropdown
+      console.log('Status updated:', data);
+    } else {
+      console.error(data.message);
+    }
+  } catch (error) {
+    console.error('Error updating status:', error);
+  }
+};
+
+
+
 
   // Fetch funding data
   useEffect(() => {
@@ -17,12 +65,54 @@ const FundingDashboard = () => {
   const fetchFundings = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/fundings`);
-      setFundings(response.data);
-      setFilteredFundings(response.data);
+      const fundingsData = response.data;
+  
+      // Fetch startup details for each funding's userId in parallel
+      const fundingsWithStartup = await Promise.all(
+        fundingsData.map(async (funding) => {
+          try {
+            const startupRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/startups/${funding.userId}`);
+            return {
+              ...funding,
+              startupDetails: startupRes.data,  // attach startup info here
+            };
+          } catch (err) {
+            console.error(`Error fetching startup for userId ${funding.userId}:`, err);
+            // Return funding without startupDetails if error
+            return funding;
+          }
+        })
+      );
+  
+      setFundings(fundingsWithStartup);
+      setFilteredFundings(fundingsWithStartup);
     } catch (error) {
       console.error('Error fetching fundings:', error);
     }
   };
+
+  const handleUpdateAmount = async () => {
+    try {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/fundings/update-amount/${selectedFunding._id}`, {
+        amountRaised: newAmountRaised,
+      });
+  
+      if (response.status === 200) {
+        const updatedFundings = fundings.map(f =>
+          f._id === selectedFunding._id ? { ...f, amountRaised: newAmountRaised } : f
+        );
+        setFundings(updatedFundings);
+        applySearchFilter(searchTerm, updatedFundings);
+        setIsEditingAmount(false);
+        alert("Amount updated successfully.");
+      }
+    } catch (error) {
+      console.error("Error updating amountRaised:", error);
+      alert("Failed to update amount.");
+    }
+  };
+  
+  
 
   // Handle approve funding
   const handleApprove = async (id) => {
@@ -35,6 +125,26 @@ const FundingDashboard = () => {
       console.error('Error approving funding:', error);
     }
   };
+
+ // Your handleCancel here
+ const handleCancel = async (id) => {
+  try {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/fundings/${id}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (response.ok) {
+      setFundings(prevFundings => prevFundings.filter(funding => funding._id !== id));
+    } else {
+      alert(data.message || 'Failed to delete funding');
+    }
+  } catch (error) {
+    console.error('Error deleting funding:', error);
+    alert('An error occurred while deleting the funding.');
+  }
+};
+  
+  
 
   // Handle hold funding
   const handleHold = async (id) => {
@@ -51,6 +161,7 @@ const FundingDashboard = () => {
   // Open popup
   const handleView = (funding) => {
     setSelectedFunding(funding);
+    setNewAmountRaised(funding.amountRaised || 0);
     setShowPopup(true);
   };
 
@@ -76,6 +187,39 @@ const FundingDashboard = () => {
     setFilteredFundings(filtered);
   };
 
+  const [filters, setFilters] = useState({
+    sector: "",
+    location: "",
+    stage: "",
+      startDate: "",
+  endDate: ""
+  });
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({ sector: "", location: "", stage: "", startDate: "",
+      endDate: "" });
+  };
+
+  const filteredRows = filteredFundings.filter((funding) => {
+    const createdAt = new Date(funding.createdAt);
+    const start = filters.startDate ? new Date(filters.startDate) : null;
+    const end = filters.endDate ? new Date(filters.endDate) : null;
+  
+    return (
+      funding.sector.toLowerCase().includes(filters.sector.toLowerCase()) &&
+      funding.location.toLowerCase().includes(filters.location.toLowerCase()) &&
+      funding.stage.toLowerCase().includes(filters.stage.toLowerCase()) &&
+      (!start || createdAt >= start) &&
+      (!end || createdAt <= end)
+    );
+  });
+  
+
   // Function to extract YouTube video ID and create an embed URL
   const getEmbedUrl = (url) => {
     if (!url) return '';
@@ -95,60 +239,209 @@ const FundingDashboard = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Funding Dashboard</h1>
+{/* Filters */}
+<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  <input
+    type="text"
+    name="sector"
+    value={filters.sector}
+    onChange={handleFilterChange}
+    placeholder="Sector"
+    className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  <input
+    type="text"
+    name="location"
+    value={filters.location}
+    onChange={handleFilterChange}
+    placeholder="Location"
+    className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  <input
+    type="text"
+    name="stage"
+    value={filters.stage}
+    onChange={handleFilterChange}
+    placeholder="Stage"
+    className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  <input
+    type="date"
+    name="startDate"
+    value={filters.startDate}
+    onChange={handleFilterChange}
+    className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  <input
+    type="date"
+    name="endDate"
+    value={filters.endDate}
+    onChange={handleFilterChange}
+    className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  <button
+    onClick={clearFilters}
+    className="bg-red-500 hover:bg-red-600 transition text-white font-medium rounded-md px-4 py-2"
+  >
+    Clear Filters
+  </button>
+</div>
 
-      {/* Search Filter */}
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search by sector, location, or stage"
-          value={searchTerm}
-          onChange={handleSearch}
-          className="w-full p-3 border border-gray-300 rounded-lg"
-        />
+{/* Table */}
+<div className="overflow-x-auto rounded shadow-md">
+  <table className="min-w-full bg-white border border-gray-200">
+    <thead className="bg-gray-100 text-gray-700 text-sm font-semibold">
+      <tr>
+      <th className="py-3 px-4 border-b text-left">CreatedAt</th>
+      <th className="py-3 px-4 border-b text-left">Startup Name</th>
+        <th className="py-3 px-4 border-b text-left">Logo</th>
+        <th className="py-3 px-4 border-b text-left">Sector</th>
+        <th className="py-3 px-4 border-b text-left">Stage</th>
+        <th className="py-3 px-4 border-b text-left">Description</th>
+        <th className="py-3 px-4 border-b text-left">Location</th>
+        <th className="py-3 px-4 border-b text-left">Stage</th>
+        <th className="py-3 px-4 border-b text-left">Status</th>
+        <th className="py-3 px-4 border-b text-center">Actions</th>
+      </tr>
+    </thead>
+    <AnimatePresence component="tbody">
+      {filteredRows.length > 0 ? (
+        filteredRows.map((funding) => (
+          <motion.tr
+            key={funding._id}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="text-sm text-gray-800 border-b hover:bg-gray-50"
+          >
+              <td className="py-3 px-4">
+  {new Date(funding.createdAt).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  })}
+</td>
+
+             <td className="py-3 px-4">{funding.startupDetails?.startupName || "No Name"}</td>
+            <td className="py-3 px-4">
+              <img
+                src={`${process.env.REACT_APP_API_URL}${funding.logoUrl}`}
+                alt="Logo"
+                className="h-10 w-10 object-cover rounded mx-auto"
+              />
+            </td>
+            <td className="py-3 px-4">{funding.sector}</td>
+            <td className="py-3 px-4">{funding.stage}</td>
+            <td className="py-3 px-4 text-sm text-gray-600">
+              {funding.shortDescription}
+            </td>
+            <td className="py-3 px-4">{funding.location}</td>
+            <td className="py-3 px-4">{funding.stage}</td>
+
+            {/* Status */}
+            <td className="py-3 px-4">
+            {editingStatusId === funding._id ? (
+  <div className="flex items-center gap-2">
+    <select
+      className="border rounded px-2 py-1 text-sm bg-gray-100 focus:ring-1 focus:ring-blue-400"
+      value={newStatus}
+      onChange={(e) => setNewStatus(e.target.value)}
+    >
+      {["waiting", "on hold", "approved"].map((status) => (
+        <option key={status} value={status}>
+          {status}
+        </option>
+      ))}
+    </select>
+    <button
+      className="text-green-600 hover:text-green-800"
+      onClick={() => handleStatusChange(funding._id, newStatus)}
+      disabled={!newStatus}
+    >
+      ✅
+    </button>
+    <button
+      className="text-red-600 hover:text-red-800"
+      onClick={() => setEditingStatusId(null)}
+    >
+      ❌
+    </button>
+  </div>
+) : (
+  <button
+    onClick={() => {
+      setEditingStatusId(funding._id);
+      setNewStatus(funding.status || "waiting");
+    }}
+    className={`rounded-full px-3 py-1 text-xs font-medium select-none cursor-pointer transition ${
+      STATUS_COLORS[funding.status] || "bg-gray-200 text-gray-700"
+    }`}
+  >
+    {funding.status || "Pending"}
+  </button>
+)}
+
+            </td>
+
+            <td className="py-3 px-4 flex gap-2 justify-center flex-wrap">
+  <button
+    onClick={() => setShowCancelPopup(funding._id)}
+    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm transition"
+  >
+    Cancel
+  </button>
+  <button
+    onClick={() => handleView(funding)}
+    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-sm transition"
+  >
+    View
+  </button>
+</td>
+
+          </motion.tr>
+        ))
+      ) : (
+        <motion.tr
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <td colSpan="7" className="p-6 text-gray-500">
+            No results found.
+          </td>
+        </motion.tr>
+      )}
+    </AnimatePresence>
+  </table>
+</div>
+{showCancelPopup && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+      <h2 className="text-lg font-semibold mb-4">Confirm Cancel</h2>
+      <p className="mb-6">Are you sure you want to cancel this item?</p>
+      <div className="flex justify-center gap-4">
+        <button
+          onClick={() => {
+            handleCancel(showCancelPopup);
+            setShowCancelPopup(null);
+          }}
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+        >
+          Yes, Cancel
+        </button>
+        <button
+          onClick={() => setShowCancelPopup(null)}
+          className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md"
+        >
+          No
+        </button>
       </div>
+    </div>
+  </div>
+)}
 
-      {/* Funding Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {filteredFundings.length > 0 ? (
-          filteredFundings.map((funding) => (
-            <div key={funding._id} className="bg-white p-4 rounded-lg shadow-md">
-              <motion.img
-          src={`${process.env.REACT_APP_API_URL}${funding.logoUrl}`}
-          alt="Startup Logo"
-          className="w-full h-40 object-cover"
-        />
-              <h2 className="text-xl font-semibold mb-1">{funding.sector}</h2>
-              <p className="text-gray-600 text-sm mb-1">{funding.shortDescription}</p>
-              <p className="text-gray-500 text-sm">Location: {funding.location}</p>
-              <p className="text-gray-500 text-sm">Stage: {funding.stage}</p>
-              <p className="text-gray-500 text-sm font-semibold">Status: {funding.status || 'Pending'}</p>
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded text-sm"
-                  onClick={() => handleApprove(funding._id)}
-                >
-                  Approve
-                </button>
-                <button
-                  className="bg-yellow-500 text-white px-4 py-2 rounded text-sm"
-                  onClick={() => handleHold(funding._id)}
-                >
-                  Hold
-                </button>
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded text-sm"
-                  onClick={() => handleView(funding)}
-                >
-                  View
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p>No results found.</p>
-        )}
-      </div>
 
       {/* Popup Modal */}
        <AnimatePresence>
@@ -282,12 +575,78 @@ const FundingDashboard = () => {
             />
           </div>
       
-          <div className="text-right text-sm text-gray-500 mt-1">
-            {Math.min(
-              (((selectedFunding?.amountRaised || 0) / (selectedFunding?.amountSeeking || 1)) * 100).toFixed(2),
-              100
-            )}% funded
-          </div>
+          <div className="flex items-center justify-between mt-1 text-sm text-gray-500">
+          <div>
+    {Math.min(
+      (((newAmountRaised || 0) / (selectedFunding?.amountSeeking || 1)) * 100).toFixed(2),
+      100
+    )}% funded
+  </div>
+  <div>
+    ₹{newAmountRaised?.toLocaleString() || 0} of ₹{selectedFunding?.amountSeeking?.toLocaleString() || 0} raised
+  </div>
+
+  {!isEditingAmount ? (
+    <button
+      onClick={() => setIsEditingAmount(true)}
+      className="text-blue-600 hover:underline text-xs ml-2"
+    >
+      Edit
+    </button>
+  ) : (
+    <div className="flex items-center gap-2">
+      <input
+        type="number"
+        value={newAmountRaised}
+        onChange={(e) => setNewAmountRaised(Number(e.target.value))}
+        className="border border-gray-300 rounded px-2 py-1 text-xs w-24"
+      />
+<button
+  onClick={async () => {
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/update-amount/${selectedFunding._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ amountRaised: newAmountRaised }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Update local state to reflect the change
+        const updatedFundings = fundings.map((funding) =>
+          funding._id === selectedFunding._id
+            ? { ...funding, amountRaised: newAmountRaised }
+            : funding
+        );
+
+        setFundings(updatedFundings);
+        setSelectedFunding((prev) => ({
+          ...prev,
+          amountRaised: newAmountRaised,
+        }));
+        setIsEditingAmount(false); // close edit mode
+      } else {
+        console.error(data.message || "Failed to update amountRaised");
+      }
+    } catch (error) {
+      console.error("Error updating amountRaised:", error);
+    }
+  }}
+  className="text-green-600 hover:underline text-xs"
+>
+  Save
+</button>
+
+    </div>
+  )}
+</div>
+
         </div>
       </div>
       

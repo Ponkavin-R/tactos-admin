@@ -23,7 +23,6 @@ import InfoIcon from "@mui/icons-material/Info";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { useNavigate } from "react-router-dom";
 
 const tamilNaduDistricts = ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", /* ... */ "Virudhunagar"];
 
@@ -36,7 +35,6 @@ const JobList = () => {
   const [popoverAnchorEl, setPopoverAnchorEl] = useState(null);
   const [selectedStartup, setSelectedStartup] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -254,7 +252,7 @@ const JobList = () => {
                     <td className="py-3 px-4">{job.salary}</td>
                     <td className="py-3 px-4">{job.experience} yrs</td>
                     <td className="py-3 px-4">{moment(job.postedAt).format("YYYY-MM-DD")}</td>
-                    <td className="py-3 px-4"><Button variant="outlined" onClick={() => navigate(`/admin/application/${job._id}`)}color="primary" size="small">View</Button></td>
+                    <td className="py-3 px-4"><Button variant="outlined" color="primary" size="small">View</Button></td>
                   </motion.tr>
                 ))}
               </React.Fragment>

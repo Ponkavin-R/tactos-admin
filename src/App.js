@@ -62,7 +62,7 @@ function App() {
                 <Route path='/admin-investors' element={<AdminInvestors/>} />
                 <Route path='/fundings' element={<FundingDashboard/>} />
                 <Route path="/admin/jobs/:userId" element={<JobsByUser/>} />
-                <Route path="/admin/application/:jobId" element={<ApplicationDetail />} />
+                <Route path="/admin/application/:id" element={<ApplicationDetail />} />
 
               </Routes>
             </div>

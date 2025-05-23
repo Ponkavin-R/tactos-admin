@@ -116,9 +116,9 @@ const JobApplicants = () => {
                   <td className="px-6 py-4">
                     {applicant.resumeUrl ? (
                       <a
-                        href={`${process.env.REACT_APP_API_URL}${applicant.resumeUrl}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      href={applicant.resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
                         className="text-indigo-600 underline hover:text-indigo-800"
                       >
                         View Resume

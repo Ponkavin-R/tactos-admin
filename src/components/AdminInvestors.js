@@ -8,6 +8,7 @@ const AdminInvestors = () => {
   const [editingId, setEditingId] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [toggle, setToggle] = useState(false);
 
   // Fetch investors
   const fetchInvestors = async () => {
@@ -15,8 +16,21 @@ const AdminInvestors = () => {
     setInvestors(res.data);
   };
 
+  // Fetch toggle state
+  const fetchToggleState = async () => {
+    const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/investortoggle`);
+    setToggle(res.data.enabled);
+  };
+
+  const handleToggleChange = async () => {
+    const updated = !toggle;
+    setToggle(updated);
+    await axios.put(`${process.env.REACT_APP_API_URL}/api/investortoggle`, { enabled: updated });
+  };
+
   useEffect(() => {
     fetchInvestors();
+    fetchToggleState();
   }, []);
 
   const handleInputChange = (e) => {
@@ -59,50 +73,78 @@ const AdminInvestors = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Manage Investors</h1>
-        <button
-          onClick={() => {
-            setFormData({ type: "", name: "", image: "" });
-            setEditingId(null);
-            setShowForm(true);
-          }}
-          className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          + New Investor
-        </button>
+
+        <div className="flex items-center space-x-4">
+          {/* Toggle */}
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-gray-700">Enabled</span>
+            <button
+              onClick={handleToggleChange}
+              className={`w-14 h-8 flex items-center rounded-full p-1 duration-300 ease-in-out ${
+                toggle ? "bg-green-500" : "bg-gray-300"
+              }`}
+            >
+              <div
+                className={`bg-white w-6 h-6 rounded-full shadow-md transform duration-300 ease-in-out ${
+                  toggle ? "translate-x-6" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          <button
+            onClick={() => {
+              setFormData({ type: "", name: "", image: "" });
+              setEditingId(null);
+              setShowForm(true);
+            }}
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            + New Investor
+          </button>
+        </div>
       </div>
 
       {/* Investor Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {investors.map((investor) => (
-          <div key={investor._id} className="bg-white p-6 rounded-xl shadow-lg flex flex-col">
-            <img src={investor.image} alt={investor.name} className="h-40 object-cover rounded-lg mb-4" />
-            <h2 className="text-xl font-semibold">{investor.name}</h2>
-            <p className="text-gray-600 mt-2">{investor.type}</p>
-            <div className="flex mt-4 space-x-2">
-              <button
-                onClick={() => handleEdit(investor)}
-                className="bg-yellow-400 px-4 py-2 rounded-full text-white hover:bg-yellow-500 transition"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDeleteConfirm(investor._id)}
-                className="bg-red-500 px-4 py-2 rounded-full text-white hover:bg-red-700 transition"
-              >
-                Delete
-              </button>
+      {toggle && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {investors.map((investor) => (
+            <div key={investor._id} className="bg-white p-6 rounded-xl shadow-lg flex flex-col">
+              <img
+                src={investor.image}
+                alt={investor.name}
+                className="h-40 object-cover rounded-lg mb-4"
+              />
+              <h2 className="text-xl font-semibold">{investor.name}</h2>
+              <p className="text-gray-600 mt-2">{investor.type}</p>
+              <div className="flex mt-4 space-x-2">
+                <button
+                  onClick={() => handleEdit(investor)}
+                  className="bg-yellow-400 px-4 py-2 rounded-full text-white hover:bg-yellow-500 transition"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteConfirm(investor._id)}
+                  className="bg-red-500 px-4 py-2 rounded-full text-white hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Form Popup */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <form onSubmit={handleFormSubmit} className="bg-white p-8 rounded-lg shadow-2xl w-[90%] max-w-lg">
+          <form
+            onSubmit={handleFormSubmit}
+            className="bg-white p-8 rounded-lg shadow-2xl w-[90%] max-w-lg"
+          >
             <h2 className="text-2xl font-bold mb-6">{editingId ? "Edit Investor" : "New Investor"}</h2>
 
-            {/* Type Dropdown */}
             <select
               name="type"
               value={formData.type}
@@ -134,6 +176,7 @@ const AdminInvestors = () => {
               className="border p-2 mb-4 w-full rounded-lg"
               required
             />
+
             <div className="flex justify-end gap-4">
               <button
                 type="button"

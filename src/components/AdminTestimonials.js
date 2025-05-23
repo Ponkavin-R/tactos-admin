@@ -8,6 +8,7 @@ const AdminTestimonials = () => {
   const [editingId, setEditingId] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [toggle, setToggle] = useState(false);
 
   // Fetch testimonials
   const fetchTestimonials = async () => {
@@ -15,26 +16,51 @@ const AdminTestimonials = () => {
     setTestimonials(res.data);
   };
 
+  // Fetch toggle state
+  const fetchToggleState = async () => {
+    try {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/clientsay`);
+      setToggle(res.data.enabled);
+    } catch (error) {
+      console.error("Error fetching toggle state", error);
+    }
+  };
+
+  const handleToggleChange = async () => {
+    const updated = !toggle;
+    setToggle(updated);
+    try {
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/clientsay`, { enabled: updated });
+    } catch (error) {
+      console.error("Error updating toggle state", error);
+    }
+  };
+
   useEffect(() => {
     fetchTestimonials();
+    fetchToggleState();
   }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      await axios.put(`${process.env.REACT_APP_API_URL}/api/testimonials/${editingId}`, formData);
-    } else {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/testimonials`, formData);
+    try {
+      if (editingId) {
+        await axios.put(`${process.env.REACT_APP_API_URL}/api/testimonials/${editingId}`, formData);
+      } else {
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/testimonials`, formData);
+      }
+      setFormData({ name: "", image: "", review: "", rating: "" });
+      setShowForm(false);
+      setEditingId(null);
+      fetchTestimonials();
+    } catch (error) {
+      console.error("Error saving testimonial", error);
     }
-    setFormData({ name: "", image: "", review: "", rating: "" });
-    setShowForm(false);
-    setEditingId(null);
-    fetchTestimonials();
   };
 
   const handleEdit = (testimonial) => {
@@ -49,29 +75,56 @@ const AdminTestimonials = () => {
   };
 
   const handleDelete = async () => {
-    await axios.delete(`${process.env.REACT_APP_API_URL}/api/testimonials/${deleteId}`);
-    setShowDeleteConfirm(false);
-    setDeleteId(null);
-    fetchTestimonials();
+    try {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/testimonials/${deleteId}`);
+      setShowDeleteConfirm(false);
+      setDeleteId(null);
+      fetchTestimonials();
+    } catch (error) {
+      console.error("Error deleting testimonial", error);
+    }
   };
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Manage Testimonials</h1>
-        <button
-          onClick={() => {
-            setFormData({ name: "", image: "", review: "", rating: "" });
-            setEditingId(null);
-            setShowForm(true);
-          }}
-          className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          + New Testimonial
-        </button>
-      </div>
+<div className="flex justify-between items-center mb-6">
+  <h1 className="text-3xl font-bold">Manage Testimonials</h1>
+
+  <div className="flex items-center space-x-6 ml-auto">
+    {/* Toggle */}
+    <div className="flex items-center space-x-2">
+      <span className="text-sm font-medium text-gray-700">Enabled</span>
+      <button
+        onClick={handleToggleChange}
+        className={`w-14 h-8 flex items-center rounded-full p-1 duration-300 ease-in-out ${
+          toggle ? "bg-green-500" : "bg-gray-300"
+        }`}
+      >
+        <div
+          className={`bg-white w-6 h-6 rounded-full shadow-md transform duration-300 ease-in-out ${
+            toggle ? "translate-x-6" : "translate-x-0"
+          }`}
+        />
+      </button>
+    </div>
+
+    {/* Add New Button */}
+    <button
+      onClick={() => {
+        setFormData({ name: "", image: "", review: "", rating: "" });
+        setEditingId(null);
+        setShowForm(true);
+      }}
+      className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+    >
+      + New Testimonial
+    </button>
+  </div>
+</div>
+
 
       {/* Testimonial Cards */}
+      {toggle && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {testimonials.map((testimonial) => (
           <div key={testimonial._id} className="bg-white p-6 rounded-xl shadow-lg flex flex-col">
@@ -96,6 +149,7 @@ const AdminTestimonials = () => {
           </div>
         ))}
       </div>
+      )}
 
       {/* Form Popup */}
       {showForm && (

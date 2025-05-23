@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
 import {
   FiTag,
@@ -30,6 +32,7 @@ const AdminEventDashboard = () => {
     logo: "",
   });
   const [editIndex, setEditIndex] = useState(null); // will store _id
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchEvents();
@@ -46,6 +49,13 @@ const AdminEventDashboard = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
+  const handleViewRegistration = (eventId) => {
+    console.log("View registration for Event ID:", eventId);
+    // You can navigate, open a modal, or fetch registration data here
+    // Example using React Router:
+    navigate(`/admin/registrations/${eventId}`);
+  };
+  
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -123,7 +133,7 @@ const AdminEventDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-full mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-6 px-4 py-3 bg-white shadow rounded-xl border border-gray-200">
   <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
     <span>Tactos Events</span>
@@ -261,6 +271,13 @@ const AdminEventDashboard = () => {
             Mark Completed
           </button>
         )}
+<button
+  onClick={() => navigate(`/registrations/${event._id}`)}
+  className="text-indigo-600 hover:underline text-sm font-medium"
+>
+  View Registrations
+</button>
+
       </div>
     </div>
   ))}
